@@ -35,7 +35,7 @@ def _worker(
             elif cmd == "seed":
                 remote.send(env.seed(data))
             elif cmd == "reset":
-                observation = env.reset()
+                observation = env.reset(**data)
                 remote.send(observation)
             elif cmd == "render":
                 remote.send(env.render(data))
@@ -127,9 +127,9 @@ class SubprocVecEnv(VecEnv):
             remote.send(("seed", seed + idx))
         return [remote.recv() for remote in self.remotes]
 
-    def reset(self) -> VecEnvObs:
+    def reset(self, **kwargs) -> VecEnvObs:
         for remote in self.remotes:
-            remote.send(("reset", None))
+            remote.send(("reset", kwargs))
         obs = [remote.recv() for remote in self.remotes]
         return _flatten_obs(obs, self.observation_space)
 
